@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
 
 export interface Todo {
@@ -20,11 +20,23 @@ export class TodoService {
   }
 
   deleteTodo(todoId: string) {
+    const todo = this.todos.find((todo) => todo.id === todoId);
+
+    if (!todo) {
+      throw new NotFoundException();
+    }
+
     this.todos = this.todos.filter((todo) => todo.id !== todoId);
   }
 
   getTodo(todoId: string) {
-    return this.todos.find((todo) => todo.id === todoId);
+    const todo = this.todos.find((todo) => todo.id === todoId);
+
+    if (!todo) {
+      throw new NotFoundException();
+    }
+
+    return todo;
   }
 
   getTodos() {
@@ -32,10 +44,14 @@ export class TodoService {
   }
 
   updateTodo(todoId: string, updateData: { isDone: boolean; title: string }) {
-    const targetTodo = this.todos.find((todo) => todo.id === todoId);
+    const todo = this.todos.find((todo) => todo.id === todoId);
 
-    Object.assign(targetTodo, updateData);
+    if (!todo) {
+      throw new NotFoundException();
+    }
 
-    return targetTodo;
+    Object.assign(todo, updateData);
+
+    return todo;
   }
 }
